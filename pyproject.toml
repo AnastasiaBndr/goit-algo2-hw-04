@@ -1,0 +1,18 @@
+[project]
+name = "goit-algo2-hw-04"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Anastasiia-Bondarchuk",email = "125996065+AnastasiaBndr@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<3.14.1 || >3.14.1"
+dependencies = [
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "networkx (>=3.6.1,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
