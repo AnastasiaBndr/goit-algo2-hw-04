@@ -1,12 +1,9 @@
-import networkx as nx
-import matplotlib.pyplot as plt
 import numpy as np
-from storage_logistics.split_row import split_row
+from src.storage_logistics.edmonds_karp import edmonds_karp
+from src.storage_logistics.draw_graph import draw_graph
 
 
 def main():
-    G = nx.DiGraph()
-
     edges = [
         ("Terminal 1", "Storage 1", 25),
         ("Terminal 1", "Storage 2", 20),
@@ -34,43 +31,31 @@ def main():
         ("Storage 4", "Shop 13", 5),
         ("Storage 4", "Shop 14", 10),
     ]
-    G.add_weighted_edges_from(edges)
+    terminals = sorted({t for t, _, _ in edges if t.startswith("Terminal")})
+    shops = sorted(
+        {t for _, t, _ in edges if t.startswith("Shop")},
+        key=lambda x: (x.split()[0], int(x.split()[1])))
 
-    nodes=sorted({u for u,v,_ in edges}|{v for u,v,_ in edges})
-    node_index={node:i for i,node in enumerate(nodes)}
-    print(node_index)
-    capacity=np.zeros((len(nodes),len(nodes)), dtype=int)
-    for u,v,w in edges:
-        i=node_index[u]
-        j=node_index[v]
-        capacity[i][j]=w
+    nodes = ["SuperSource"]+terminals +\
+        sorted({u for u, _, _ in edges if u.startswith("Storage")}, key=lambda x: (x.split()[0], int(x.split()[1]))) +\
+        shops+["SuperSink"]
 
-    print(capacity)
+    node_index = {node: i for i, node in enumerate(nodes)}
 
-    shops = [n for n in G.nodes if n.startswith("Shop")]
-    storages = [n for n in G.nodes if n.startswith("Storage")]
-    terminals = [n for n in G.nodes if n.startswith("Terminal")]
+    capacity = np.zeros((len(nodes), len(nodes)), dtype=int)
+    for u, v, w in edges:
+        capacity[node_index[u]][node_index[v]] = w
 
-    pos = {}
+    for t in terminals:
+        capacity[node_index["SuperSource"]][node_index[t]] = 10**9
 
-    pos.update(split_row(shops, y_top=2, y_bottom=-2))
-    pos.update(split_row(storages, y_top=1, y_bottom=-1, x_shift=len(shops)//4))
-    for i, node in enumerate(terminals):
-        pos[node] = (i * 3, 0)
+    for s in shops:
+        capacity[node_index[s]][node_index["SuperSink"]] = 10**9
 
-    color_map = [
-        "lightgreen" if n.startswith("Shop")
-        else "orange" if n.startswith("Storage")
-        else "skyblue"
-        for n in G.nodes
-    ]
+    max_flow=edmonds_karp(capacity, node_index['SuperSource'],node_index['SuperSink'])
+    print(f'Max_flow={max_flow}')
 
-    plt.figure(figsize=(20, 10))
-    nx.draw(G, pos, node_color=color_map, with_labels=True, node_size=1500,
-            font_size=8, font_weight="bold", arrows=True)
-    labels = nx.get_edge_attributes(G, 'weight')
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-    plt.show()
+    draw_graph(edges)
 
 
 if __name__ == "__main__":
