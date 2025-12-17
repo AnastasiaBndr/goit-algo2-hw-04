@@ -45,4 +45,4 @@ def edmonds_karp(capacity_matrix, source, sink):
 
         max_flow += path_flow
 
-    return max_flow
+    return [max_flow, flow_matrix]

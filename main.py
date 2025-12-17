@@ -1,6 +1,7 @@
 import numpy as np
 from src.storage_logistics.edmonds_karp import edmonds_karp
 from src.storage_logistics.draw_graph import draw_graph
+from src.storage_logistics.get_terminal_to_shop_flow import get_terminal_to_shop_flow
 
 
 def main():
@@ -35,6 +36,7 @@ def main():
     shops = sorted(
         {t for _, t, _ in edges if t.startswith("Shop")},
         key=lambda x: (x.split()[0], int(x.split()[1])))
+    storages = sorted({t for t, _, _ in edges if t.startswith("Storage")})
 
     nodes = ["SuperSource"]+terminals +\
         sorted({u for u, _, _ in edges if u.startswith("Storage")}, key=lambda x: (x.split()[0], int(x.split()[1]))) +\
@@ -52,8 +54,18 @@ def main():
     for s in shops:
         capacity[node_index[s]][node_index["SuperSink"]] = 10**9
 
-    max_flow=edmonds_karp(capacity, node_index['SuperSource'],node_index['SuperSink'])
-    print(f'Max_flow={max_flow}')
+    karp_result = edmonds_karp(
+        capacity, node_index['SuperSource'], node_index['SuperSink'])
+    max_flow = karp_result[0]
+    flow_matrix = karp_result[1]
+    table=get_terminal_to_shop_flow(flow_matrix, node_index,
+                              terminals, shops, storages)
+    print("Термінал\tМагазин\tФактичний Потік")
+
+
+    for t in terminals:
+        for s in shops:
+            print(f"{t}\t{s}\t{int(table[t][s])}")
 
     draw_graph(edges)
 
