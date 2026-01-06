@@ -2,9 +2,9 @@ import numpy as np
 from src.storage_logistics.edmonds_karp import edmonds_karp
 from src.storage_logistics.draw_graph import draw_graph
 from src.storage_logistics.get_terminal_to_shop_flow import get_terminal_to_shop_flow
+from src.trie.homework import Homework
 
-
-def main():
+def edges():
     edges = [
         ("Terminal 1", "Storage 1", 25),
         ("Terminal 1", "Storage 2", 20),
@@ -56,7 +56,6 @@ def main():
 
     karp_result = edmonds_karp(
         capacity, node_index['SuperSource'], node_index['SuperSink'])
-    max_flow = karp_result[0]
     flow_matrix = karp_result[1]
     table=get_terminal_to_shop_flow(flow_matrix, node_index,
                               terminals, shops, storages)
@@ -68,6 +67,33 @@ def main():
             print(f"{t}\t{s}\t{int(table[t][s])}")
 
     draw_graph(edges)
+
+def prefix_tree():
+    trie = Homework()
+    words = ["apple", "application", "banana", "cat"]
+    for i, word in enumerate(words):
+        trie.put(word, i)
+
+    # Перевірка кількості слів, що закінчуються на заданий суфікс
+    assert trie.count_words_with_suffix("e") == 1  # apple
+    assert trie.count_words_with_suffix("ion") == 1  # application
+    assert trie.count_words_with_suffix("a") == 1  # banana
+    assert trie.count_words_with_suffix("at") == 1  # cat
+
+    # Перевірка наявності префікса
+    assert trie.has_prefix("app") == True  # apple, application
+    assert trie.has_prefix("bat") == False
+    assert trie.has_prefix("ban") == True  # banana
+    assert trie.has_prefix("ca") == True  # cat
+
+
+def main():
+    edges()
+    try:
+        prefix_tree()
+        print("✅ Усі тести пройдено")
+    except AssertionError:
+        print("❌ Тест не пройшов")
 
 
 if __name__ == "__main__":
